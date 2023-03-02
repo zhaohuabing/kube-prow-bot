@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"os"
 	"strings"
 
 	"github.com/xunzhuo/kube-prow-bot/cmd/kube-prow-bot/config"
@@ -76,4 +77,8 @@ func formatUserIDs(names []string) []string {
 		formatedIDs = append(formatedIDs, strings.TrimPrefix(name, "@"))
 	}
 	return formatedIDs
+}
+
+func isYouSelf() bool {
+	return strings.TrimSpace(os.Getenv("AUTHOR")) == config.Get().LOGIN
 }

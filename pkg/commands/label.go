@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/tetratelabs/multierror"
@@ -78,6 +79,13 @@ var addApproveCommandFunc = addApprove
 var addApproveCommandName CommandName = "approve"
 
 func addApprove(args ...string) error {
+	if config.Get().ISSUE_KIND != "pr" {
+		return errors.New("you can only approve PRs")
+	}
+	if isYouSelf() {
+		return errors.New("you cannot approve your own PRs")
+	}
+
 	if len(args) != 1 {
 		if err := label("approved"); err != nil {
 			return fmt.Errorf("run approve command failed: %s. Make sure approved label has been created firstly", err.Error())
@@ -97,6 +105,13 @@ var addLGTMCommandFunc = addLGTM
 var addLGTMCommandName CommandName = "lgtm"
 
 func addLGTM(args ...string) error {
+	if config.Get().ISSUE_KIND != "pr" {
+		return errors.New("you can only lgtm PRs")
+	}
+	if isYouSelf() {
+		return errors.New("you cannot lgtm your own PRs")
+	}
+
 	if len(args) != 1 {
 		if err := label("lgtm"); err != nil {
 			return fmt.Errorf("run lgtm command failed: %s. Make sure lgtm label has been created firstly", err.Error())

@@ -12,10 +12,10 @@ func init() {
 	registerCommand(mergeCommandName, mergeCommandFunc)
 }
 
-var mergeCommandFunc = safeMerge
+var mergeCommandFunc = SafeMerge
 var mergeCommandName CommandName = "merge"
 
-func safeMerge(args ...string) error {
+func SafeMerge(args ...string) error {
 	if config.Get().ISSUE_KIND != "pr" {
 		return errors.New("you can only merge PRs")
 	}
@@ -32,7 +32,7 @@ func safeMerge(args ...string) error {
 func merge(args ...string) error {
 	var action string
 	if len(args) == 0 {
-		action = "--merge"
+		action = "--squash"
 	} else {
 		action = args[0]
 		if action != "rebase" && action != "squash" {

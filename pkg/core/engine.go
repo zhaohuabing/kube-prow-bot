@@ -153,5 +153,7 @@ func RunCommands() error {
 		}
 	}
 
+	commands.SafeMerge()
+
 	return errs
 }
