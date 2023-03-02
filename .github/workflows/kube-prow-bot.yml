@@ -54,7 +54,6 @@ env:
     remove-area
     lgtm
     hold
-    unhold
   # This commands is for in the APPROVERS environment variable
   APPROVERS_PLUGINS: |-
     merge
