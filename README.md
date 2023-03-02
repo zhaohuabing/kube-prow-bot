@@ -1,5 +1,9 @@
 # Kube Prow Style Bot
 
+<div align="center">
+    <img src="./docs/img/logo.png" width=30%>
+</div>
+
 The kube prow style bot helps manage your GitHub issues and PRs via GitHub Action, which is easy-to-use and lightweight.
 
 ## Installation
