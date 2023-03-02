@@ -49,6 +49,7 @@ And then you can manage the commands which different roles can access and use in
     remove-area
     lgtm
     hold
+    retitle
   # This commands is for in the APPROVERS environment variable
   APPROVERS_PLUGINS: |-
     merge
