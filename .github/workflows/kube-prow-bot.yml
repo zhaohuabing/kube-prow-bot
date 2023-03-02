@@ -48,12 +48,12 @@ env:
     help-wanted
     close
     reopen
-  # This commands is for in the REVIEWERS environment variable
   REVIEWERS_PLUGINS: |-
     area
     remove-area
     lgtm
     hold
+    retitle
   # This commands is for in the APPROVERS environment variable
   APPROVERS_PLUGINS: |-
     merge
@@ -65,6 +65,8 @@ env:
     remove-milestone
     priority
     remove-priority
+    project
+    remove-project
 
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GH_REPOSITORY: ${{ github.repository }}
