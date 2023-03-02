@@ -1,12 +1,10 @@
 package commands
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/xunzhuo/kube-prow-bot/cmd/kube-prow-bot/config"
+	"github.com/xunzhuo/kube-prow-bot/pkg/utils"
 )
 
 func init() {
@@ -17,10 +15,6 @@ func init() {
 var assignCommandFunc = assign
 var assignCommandName CommandName = "assign"
 
-type assignees struct {
-	Assignees []string `json:"assignees"`
-}
-
 func assign(args ...string) error {
 	var assignee []string
 	if len(args) == 0 {
@@ -29,25 +23,7 @@ func assign(args ...string) error {
 		assignee = formatUserIDs(args)
 	}
 
-	url := fmt.Sprintf("https://api.github.com/repos/%s/issues/%s/assignees", config.Get().GH_REPOSITORY, config.Get().ISSUE_NUMBER)
-	data, err := json.Marshal(assignees{Assignees: assignee})
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(string(data)))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Accept", "application/vnd.github.v3+json")
-	req.Header.Set("Authorization", fmt.Sprintf("token %s", config.Get().GH_TOKEN))
-	c := http.DefaultClient
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	return nil
+	return addAssignee(assignee)
 }
 
 var unassignCommand = unassign
@@ -61,25 +37,37 @@ func unassign(args ...string) error {
 		assignee = formatUserIDs(args)
 	}
 
-	url := fmt.Sprintf("https://api.github.com/repos/%s/issues/%s/assignees", config.Get().GH_REPOSITORY, config.Get().ISSUE_NUMBER)
-	data, err := json.Marshal(assignees{Assignees: assignee})
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequest(http.MethodDelete, url, strings.NewReader(string(data)))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Accept", "application/vnd.github.v3+json")
-	req.Header.Set("Authorization", fmt.Sprintf("token %s", config.Get().GH_TOKEN))
-	c := http.DefaultClient
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+	return removeAssignee(assignee)
+}
 
-	return nil
+func addAssignee(IDs []string) error {
+	ids := []string{
+		config.Get().ISSUE_KIND,
+		"-R",
+		config.Get().GH_REPOSITORY,
+		"edit",
+		config.Get().ISSUE_NUMBER,
+	}
+	for _, id := range IDs {
+		ids = append(ids, "--add-assignee", id)
+	}
+
+	return utils.ExecGitHubCmd(ids...)
+}
+
+func removeAssignee(IDs []string) error {
+	ids := []string{
+		config.Get().ISSUE_KIND,
+		"-R",
+		config.Get().GH_REPOSITORY,
+		"edit",
+		config.Get().ISSUE_NUMBER,
+	}
+	for _, id := range IDs {
+		ids = append(ids, "--remove-assignee", id)
+	}
+
+	return utils.ExecGitHubCmd(ids...)
 }
 
 func formatUserIDs(names []string) []string {
