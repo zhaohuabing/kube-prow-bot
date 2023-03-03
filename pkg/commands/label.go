@@ -109,9 +109,8 @@ func addApprove(args ...string) error {
 		return errors.New("you cannot approve your own PRs")
 	}
 
-	comment(approveNotifier())
-
 	if len(args) != 1 {
+		comment(approveNotifier())
 		if err := label("approved"); err != nil {
 			return fmt.Errorf("run approve command failed: %s. Make sure approved label has been created firstly", err.Error())
 		}
@@ -160,12 +159,12 @@ func addLGTM(args ...string) error {
 		return errors.New("you cannot lgtm your own PRs")
 	}
 
-	// we usually assign the reviewer who has lgtm the PR.
-	addAssignee([]string{config.Get().LOGIN})
-
-	comment(lgtmNotifier())
-
 	if len(args) != 1 {
+		// we usually assign the reviewer who has lgtm the PR.
+		addAssignee([]string{config.Get().LOGIN})
+
+		comment(lgtmNotifier())
+
 		if err := label("lgtm"); err != nil {
 			return fmt.Errorf("run lgtm command failed: %s. Make sure lgtm label has been created firstly", err.Error())
 		}
