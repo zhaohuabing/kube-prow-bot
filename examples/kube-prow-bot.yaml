@@ -25,12 +25,12 @@ on:
       - opened
 
 env:
-  REVIEWERS: |-
-    Xunzhuo
-  APPROVERS: |-
-    Xunzhuo
-  MAINTAINERS: |-
-    Xunzhuo
+  # REVIEWERS: |-
+  #   Xunzhuo
+  # APPROVERS: |-
+  #   Xunzhuo
+  # MAINTAINERS: |-
+  #   Xunzhuo
 
   # This commands is for anyone who can use it
   COMMON_PLUGINS: |-
@@ -67,8 +67,6 @@ env:
     remove-milestone
     priority
     remove-priority
-    project
-    remove-project
 
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GH_REPOSITORY: ${{ github.repository }}
