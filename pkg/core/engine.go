@@ -202,7 +202,9 @@ func RunCommands() error {
 	var errs error
 
 	messages := os.Getenv("MESSAGE")
-	if messages == "" {
+	prState := os.Getenv("PR_STATE")
+
+	if messages == "" && prState != "approved" {
 		return nil
 	}
 
@@ -211,7 +213,6 @@ func RunCommands() error {
 	klog.Info("Available commands for @", config.Get().LOGIN, ":\n", listPlugins(ownerPlugins))
 
 	hasRunApprove := false
-	prState := os.Getenv("PR_STATE")
 	if prState == "approved" {
 		if _, ok := ownerPlugins["approve"]; ok {
 			cfunc, found := commands.GetCommand(commands.CommandName("approve"))
