@@ -13,7 +13,7 @@ import (
 	"github.com/xunzhuo/kube-prow-bot/cmd/kube-prow-bot/config"
 	"github.com/xunzhuo/kube-prow-bot/pkg/commands"
 	"github.com/xunzhuo/kube-prow-bot/pkg/utils"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	"k8s.io/klog"
 )
 
@@ -199,6 +199,8 @@ func listPlugins(cmds map[string]struct{}) []string {
 }
 
 func RunCommands() error {
+	var errs error
+
 	messages := os.Getenv("MESSAGE")
 	if messages == "" {
 		return nil
@@ -208,7 +210,21 @@ func RunCommands() error {
 
 	klog.Info("Available commands for @", config.Get().LOGIN, ":\n", listPlugins(ownerPlugins))
 
-	var errs error
+	hasRunApprove := false
+	prState := os.Getenv("PR_STATE")
+	if prState == "approved" {
+		if _, ok := ownerPlugins["approve"]; ok {
+			cfunc, found := commands.GetCommand(commands.CommandName("approve"))
+			if found {
+				klog.Info("Running command: ", "approve")
+				hasRunApprove = true
+				if err := cfunc(); err != nil {
+					errs = multierror.Append(errs, err)
+				}
+			}
+		}
+	}
+
 	for _, message := range strings.Split(messages, "\n") {
 		cmd := CommandRegex.Find([]byte(message))
 		if cmd != nil {
@@ -220,6 +236,9 @@ func RunCommands() error {
 				commandName := cm[0]
 				if _, ok := ownerPlugins[commandName]; !ok {
 					klog.Info("User: ", config.Get().LOGIN, " does not have this plugin: ", commandName, " privilege.")
+					continue
+				}
+				if commandName == "approve" && hasRunApprove {
 					continue
 				}
 				cfunc, found := commands.GetCommand(commands.CommandName(commandName))
