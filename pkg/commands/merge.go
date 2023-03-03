@@ -46,6 +46,5 @@ func merge(args ...string) error {
 		config.Get().GH_REPOSITORY,
 		"merge",
 		config.Get().ISSUE_NUMBER,
-		"--auto",
 		action)
 }

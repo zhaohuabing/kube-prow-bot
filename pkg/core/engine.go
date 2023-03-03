@@ -124,6 +124,12 @@ func constructOWNERRoles() (*Roles, error) {
 	if err != nil {
 		return nil, err
 	}
+	ir := strings.Split(branch, "\n")
+	for _, i := range ir {
+		if strings.TrimSpace(i) != "" && strings.TrimSpace(i) != "\n" {
+			branch = strings.TrimSpace(i)
+		}
+	}
 	r, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/OWNERS", os.Getenv("GH_REPOSITORY"), strings.TrimSuffix(branch, "\n")))
 	if err != nil {
 		return nil, err
@@ -202,7 +208,9 @@ func RunCommands() error {
 	var errs error
 
 	messages := os.Getenv("MESSAGE")
-	if messages == "" {
+	prState := os.Getenv("PR_STATE")
+
+	if messages == "" && prState != "approved" {
 		return nil
 	}
 
@@ -211,6 +219,7 @@ func RunCommands() error {
 	klog.Info("Available commands for @", config.Get().LOGIN, ":\n", listPlugins(ownerPlugins))
 
 	hasRunApprove := false
+
 	prState := os.Getenv("PR_STATE")
 	if prState == "approved" {
 		if _, ok := ownerPlugins["approve"]; ok {
