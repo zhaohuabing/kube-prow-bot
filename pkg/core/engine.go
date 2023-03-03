@@ -124,6 +124,13 @@ func constructOWNERRoles() (*Roles, error) {
 	if err != nil {
 		return nil, err
 	}
+	ir := strings.Split(branch, "\n")
+	for _, i := range ir {
+		if strings.TrimSpace(i) != "" && strings.TrimSpace(i) != "\n" {
+			branch = strings.TrimSpace(i)
+			break
+		}
+	}
 	r, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/OWNERS", os.Getenv("GH_REPOSITORY"), strings.TrimSuffix(branch, "\n")))
 	if err != nil {
 		return nil, err
