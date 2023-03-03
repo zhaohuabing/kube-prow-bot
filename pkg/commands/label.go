@@ -105,11 +105,11 @@ func addApprove(args ...string) error {
 		return errors.New("you can only approve PRs")
 	}
 
-	comment(approveNotifier())
+	if isYouSelf() {
+		return errors.New("you cannot approve your own PRs")
+	}
 
-	// if isYouSelf() {
-	// 	return errors.New("you cannot approve your own PRs")
-	// }
+	comment(approveNotifier())
 
 	if len(args) != 1 {
 		if err := label("approved"); err != nil {
@@ -156,14 +156,14 @@ func addLGTM(args ...string) error {
 		return errors.New("you can only lgtm PRs")
 	}
 
+	if isYouSelf() {
+		return errors.New("you cannot lgtm your own PRs")
+	}
+
 	// we usually assign the reviewer who has lgtm the PR.
 	addAssignee([]string{config.Get().LOGIN})
 
 	comment(lgtmNotifier())
-
-	// if isYouSelf() {
-	// 	return errors.New("you cannot lgtm your own PRs")
-	// }
 
 	if len(args) != 1 {
 		if err := label("lgtm"); err != nil {
