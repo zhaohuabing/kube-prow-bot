@@ -68,13 +68,22 @@ func constructPlugins() {
 }
 
 func constructRoles() {
+	valid := false
 	if rs, err := constructOWNERRoles(); err == nil && rs != nil {
 		ROLES = *rs
 		data, _ := json.Marshal(ROLES)
-		klog.Info("PROJECT OWNER ROLES: \n", string(data))
-		return
+		if len(ROLES.Reviewers) != 0 ||
+			len(ROLES.Approvers) != 0 ||
+			len(ROLES.Maintainers) != 0 {
+			valid = true
+			klog.Info("PROJECT OWNER ROLES: \n", string(data))
+		}
 	} else {
 		klog.Error(err)
+	}
+
+	if valid {
+		return
 	}
 
 	ROLES = constructEnvRoles()
