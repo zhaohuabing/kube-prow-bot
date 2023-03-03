@@ -107,9 +107,9 @@ func addApprove(args ...string) error {
 
 	comment(approveNotifier())
 
-	if isYouSelf() {
-		return errors.New("you cannot approve your own PRs")
-	}
+	// if isYouSelf() {
+	// 	return errors.New("you cannot approve your own PRs")
+	// }
 
 	if len(args) != 1 {
 		if err := label("approved"); err != nil {
@@ -158,9 +158,9 @@ func addLGTM(args ...string) error {
 
 	comment(lgtmNotifier())
 
-	if isYouSelf() {
-		return errors.New("you cannot lgtm your own PRs")
-	}
+	// if isYouSelf() {
+	// 	return errors.New("you cannot lgtm your own PRs")
+	// }
 
 	if len(args) != 1 {
 		if err := label("lgtm"); err != nil {
