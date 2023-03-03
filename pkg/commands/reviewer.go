@@ -21,7 +21,7 @@ func cc(args ...string) error {
 		revs = formatUserIDs(args)
 	}
 
-	return addReviewers(revs)
+	return addAssignee(revs)
 }
 
 var unCCCommand = unCC
@@ -35,10 +35,10 @@ func unCC(args ...string) error {
 		revs = formatUserIDs(args)
 	}
 
-	return removeReviewers(revs)
+	return removeAssignee(revs)
 }
 
-func addReviewers(IDs []string) error {
+func AddReviewers(IDs []string) error {
 	ids := []string{
 		config.Get().ISSUE_KIND,
 		"-R",
@@ -53,7 +53,7 @@ func addReviewers(IDs []string) error {
 		ids...)
 }
 
-func removeReviewers(IDs []string) error {
+func RemoveReviewers(IDs []string) error {
 	ids := []string{
 		config.Get().ISSUE_KIND,
 		"-R",
