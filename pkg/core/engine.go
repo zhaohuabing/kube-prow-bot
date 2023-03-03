@@ -173,7 +173,7 @@ func constructOwnPlugins() map[string]struct{} {
 		plugins = appendPlugins(plugins, MEMBERS_PLUGINS)
 		plugins = appendPlugins(plugins, REVIEWERS_PLUGINS)
 	}
-	if belongTo(own, ROLES.Reviewers) {
+	if belongTo(own, ROLES.Approvers) {
 		plugins = appendPlugins(plugins, AUTHOR_PLUGINS)
 		plugins = appendPlugins(plugins, MEMBERS_PLUGINS)
 		plugins = appendPlugins(plugins, REVIEWERS_PLUGINS)
