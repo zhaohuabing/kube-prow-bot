@@ -1,6 +1,10 @@
 package core
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -8,6 +12,8 @@ import (
 	"github.com/tetratelabs/multierror"
 	"github.com/xunzhuo/kube-prow-bot/cmd/kube-prow-bot/config"
 	"github.com/xunzhuo/kube-prow-bot/pkg/commands"
+	"github.com/xunzhuo/kube-prow-bot/pkg/utils"
+	"gopkg.in/yaml.v2"
 	"k8s.io/klog"
 )
 
@@ -23,12 +29,25 @@ var (
 )
 
 var (
-	REVIEWERS   = []string{}
-	APPROVERS   = []string{}
-	MAINTAINERS = []string{}
+	ROLES = Roles{
+		Maintainers: []string{},
+		Approvers:   []string{},
+		Reviewers:   []string{},
+	}
 )
 
 func init() {
+	constructPlugins()
+	constructRoles()
+}
+
+type Roles struct {
+	Maintainers []string `yaml:"maintainers"`
+	Approvers   []string `yaml:"approvers"`
+	Reviewers   []string `yaml:"reviewers"`
+}
+
+func constructPlugins() {
 	plugins := os.Getenv("COMMON_PLUGINS")
 	COMMON_PLUGINS = strings.Split(plugins, "\n")
 
@@ -46,15 +65,69 @@ func init() {
 
 	plugins = os.Getenv("MAINTAINERS_PLUGINS")
 	MAINTAINERS_PLUGINS = strings.Split(plugins, "\n")
+}
+
+func constructRoles() {
+	if rs, err := constructOWNERRoles(); err == nil && rs != nil {
+		ROLES = *rs
+		data, _ := json.Marshal(ROLES)
+		klog.Info("PROJECT OWNER ROLES: \n", string(data))
+		return
+	} else {
+		klog.Error(err)
+	}
+
+	ROLES = constructEnvRoles()
+	data, _ := json.Marshal(ROLES)
+	klog.Info("PROJECT ENV ROLES: \n", string(data))
+}
+
+func constructEnvRoles() Roles {
+	roleList := Roles{
+		Maintainers: []string{},
+		Approvers:   []string{},
+		Reviewers:   []string{},
+	}
 
 	roles := os.Getenv("REVIEWERS")
-	REVIEWERS = strings.Split(roles, "\n")
+	REVIEWERS := strings.Split(roles, "\n")
+	roleList.Reviewers = append(roleList.Reviewers, REVIEWERS...)
 
 	roles = os.Getenv("APPROVERS")
-	APPROVERS = strings.Split(roles, "\n")
+	APPROVERS := strings.Split(roles, "\n")
+	roleList.Approvers = append(roleList.Approvers, APPROVERS...)
 
 	roles = os.Getenv("MAINTAINERS")
-	MAINTAINERS = strings.Split(roles, "\n")
+	MAINTAINERS := strings.Split(roles, "\n")
+	roleList.Maintainers = append(roleList.Maintainers, MAINTAINERS...)
+
+	return roleList
+}
+
+func constructOWNERRoles() (*Roles, error) {
+	roles := &Roles{
+		Maintainers: []string{},
+		Approvers:   []string{},
+		Reviewers:   []string{},
+	}
+
+	branch, err := utils.ExecGitHubCmdWithOutput("api", fmt.Sprintf("/repos/%s", os.Getenv("GH_REPOSITORY")), "-q", ".default_branch")
+	if err != nil {
+		return nil, err
+	}
+	r, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/OWNERS", os.Getenv("GH_REPOSITORY"), strings.TrimSuffix(branch, "\n")))
+	if err != nil {
+		return nil, err
+	}
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
+	}
+	if err := yaml.Unmarshal([]byte(body), roles); err != nil {
+		return nil, err
+	}
+
+	return roles, nil
 }
 
 func belongTo(name string, groups []string) bool {
@@ -86,18 +159,18 @@ func constructOwnPlugins() map[string]struct{} {
 		plugins = appendPlugins(plugins, AUTHOR_PLUGINS)
 		plugins = appendPlugins(plugins, MEMBERS_PLUGINS)
 	}
-	if belongTo(own, REVIEWERS) {
+	if belongTo(own, ROLES.Reviewers) {
 		plugins = appendPlugins(plugins, AUTHOR_PLUGINS)
 		plugins = appendPlugins(plugins, MEMBERS_PLUGINS)
 		plugins = appendPlugins(plugins, REVIEWERS_PLUGINS)
 	}
-	if belongTo(own, APPROVERS) {
+	if belongTo(own, ROLES.Reviewers) {
 		plugins = appendPlugins(plugins, AUTHOR_PLUGINS)
 		plugins = appendPlugins(plugins, MEMBERS_PLUGINS)
 		plugins = appendPlugins(plugins, REVIEWERS_PLUGINS)
 		plugins = appendPlugins(plugins, APPROVERS_PLUGINS)
 	}
-	if belongTo(own, MAINTAINERS) {
+	if belongTo(own, ROLES.Maintainers) {
 		plugins = appendPlugins(plugins, AUTHOR_PLUGINS)
 		plugins = appendPlugins(plugins, MEMBERS_PLUGINS)
 		plugins = appendPlugins(plugins, REVIEWERS_PLUGINS)
@@ -108,11 +181,23 @@ func constructOwnPlugins() map[string]struct{} {
 	return plugins
 }
 
+func listPlugins(cmds map[string]struct{}) []string {
+	cmdList := []string{}
+	for cmd := range cmds {
+		cmdList = append(cmdList, cmd)
+	}
+	return cmdList
+}
+
 func RunCommands() error {
 	messages := os.Getenv("MESSAGE")
 	if messages == "" {
 		return nil
 	}
+
+	ownerPlugins := constructOwnPlugins()
+
+	klog.Info("Available commands for @", config.Get().LOGIN, ":\n", listPlugins(ownerPlugins))
 
 	var errs error
 	for _, message := range strings.Split(messages, "\n") {
@@ -124,8 +209,8 @@ func RunCommands() error {
 			cm := strings.Split(c, " ")
 			if len(cm) == 1 {
 				commandName := cm[0]
-				if _, ok := constructOwnPlugins()[commandName]; !ok {
-					klog.Info("User: ", config.Get().LOGIN, " does have this plugin: ", commandName, " privilege.")
+				if _, ok := ownerPlugins[commandName]; !ok {
+					klog.Info("User: ", config.Get().LOGIN, " does not have this plugin: ", commandName, " privilege.")
 					continue
 				}
 				cfunc, found := commands.GetCommand(commands.CommandName(commandName))
@@ -138,8 +223,8 @@ func RunCommands() error {
 			} else if len(cm) > 1 {
 				commandName := cm[0]
 				commandInput := cm[1:]
-				if _, ok := constructOwnPlugins()[commandName]; !ok {
-					klog.Info("User: ", config.Get().LOGIN, " does have this plugin: ", commandName, " privilege.")
+				if _, ok := ownerPlugins[commandName]; !ok {
+					klog.Info("User: ", config.Get().LOGIN, " does not have this plugin: ", commandName, " privilege.")
 					continue
 				}
 				cfunc, found := commands.GetCommand(commands.CommandName(commandName))
