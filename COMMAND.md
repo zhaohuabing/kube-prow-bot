@@ -15,9 +15,10 @@
 |      reopen      |                    `/reopen`                    |    Member    |
 |       area       |                  `/area label`                  |   Reviewer   |
 |   remove-area    |              `/remove-area label`               |   Reviewer   |
-|       lgtm       |                     `/lgtm`                     |   Reviewer   |
-|       hold       |                     `/hold`                     |   Reviewer   |
-|     approve      |                   `/approve`                    |   Approver   |
+|       lgtm       |              `/lgtm`, `/lgtm cancel`            |   Reviewer   |
+|       hold       |              `/hold`, `/hold cancel`            |   Reviewer   |
+|      retitle     |                `/retitle xx`                    |   Reviewer   |
+|     approve      |              `/approve`, `/approve cancel`      |   Approver   |
 |      rebase      |                    `/rebase`                    |   Approver   |
 |      merge       |   `/merge` , `/merge rebase`, `/merge squash`   |   Approver   |
 |    milestone     |                `/milestone name`                |  Maintainer  |

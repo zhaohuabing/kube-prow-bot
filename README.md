@@ -104,7 +104,6 @@ List commands which kube prow style bot supports now:
 |   remove-area    |              `/remove-area label`               |   Reviewer   |
 |       lgtm       |                     `/lgtm`                     |   Reviewer   |
 |       hold       |                     `/hold`                     |   Reviewer   |
-|      unhold      |                    `/unhold`                    |   Reviewer   |
 |     approve      |                   `/approve`                    |   Approver   |
 |      rebase      |                    `/rebase`                    |   Approver   |
 |      merge       |   `/merge` , `/merge rebase`, `/merge squash`   |   Approver   |
