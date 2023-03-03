@@ -156,6 +156,9 @@ func addLGTM(args ...string) error {
 		return errors.New("you can only lgtm PRs")
 	}
 
+	// we usually assign the reviewer who has lgtm the PR.
+	addAssignee([]string{config.Get().LOGIN})
+
 	comment(lgtmNotifier())
 
 	// if isYouSelf() {
