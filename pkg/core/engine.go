@@ -220,7 +220,6 @@ func RunCommands() error {
 
 	hasRunApprove := false
 
-	prState := os.Getenv("PR_STATE")
 	if prState == "approved" {
 		if _, ok := ownerPlugins["approve"]; ok {
 			cfunc, found := commands.GetCommand(commands.CommandName("approve"))
