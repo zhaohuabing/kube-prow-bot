@@ -8,7 +8,25 @@ The kube prow style bot helps manage your issues and PRs via GitHub Action, whic
 
 ## Installation
 
-Take this as an example to use this bot: [examples](./examples/kube-prow-bot.yaml). You should edit it firstly to set up maintainers, approvers and reviewers of your project:
+Take this as an example to use this bot: [examples](./examples/kube-prow-bot.yaml). You should edit it firstly to set up maintainers, approvers and reviewers of your project.
+
+We support read roles from OWNERS file, see https://github.com/Xunzhuo/kube-prow-bot/blob/main/OWNERS:
+
+``` yaml
+# See the OWNERS docs at https://go.k8s.io/owners
+
+maintainers:
+  - Xunzhuo
+
+approvers:
+  - Xunzhuo
+
+reviewers:
+  - Xunzhuo
+
+```
+
+We also support define Roles in env (We will prioritize reading roles from OWNERS):
 
 ```yaml
 env:
@@ -94,6 +112,12 @@ List commands which kube prow style bot supports now:
 | remove-milestone |            `/remove-milestone name`             |  Maintainer  |
 |     priority     |                `/priority name`                 |  Maintainer  |
 | remove-priority  |             `/remove-priority name`             |  Maintainer  |
+
+## Automation
+
+Pull Request will be merged automatically when it has been `/approve` and `/lgtm`.
+
+But it will be stopped when it has `/hold`, use `/hold cancel` to process to merge it.
 
 ## Contact
 
