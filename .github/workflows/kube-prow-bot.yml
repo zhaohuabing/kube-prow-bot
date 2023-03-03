@@ -69,15 +69,6 @@ env:
 
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GH_REPOSITORY: ${{ github.repository }}
-  HELP_INFO: |-
-
-    <details>
-    <summary>Help</summary>
-
-    Instructions for interacting with me using comments are available here.
-    If you have questions or suggestions related to my behavior, please file an issue against the [kube-prow-bot](https://github.com/Xunzhuo/kube-prow-bot) repository.
-
-    </details>
 
 # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
 permissions:
@@ -126,9 +117,17 @@ jobs:
           ISSUE_KIND: pr
           TYPE: created
           GREETING: |-
-            Hi @${{ github.event.pull_request.user.login }},
-            Thanks for your pull request! 🎉
+            Hi @${{ github.event.pull_request.user.login }}. Thanks for your PR! 🎉
             If the PR is ready, use the `/cc` command to assign reviewer to review. 
+
+            <details>
+              <summary>Details</summary>
+
+            The full list of commands accepted by this bot can be found [here](https://github.com/Xunzhuo/kube-prow-bot/blob/main/COMMAND.md).
+            
+            The pull request process is described [here](https://github.com/Xunzhuo/kube-prow-bot/blob/main/PROCESS.md).
+
+            </details>
 
       - name: Issue Commented
         uses: ./

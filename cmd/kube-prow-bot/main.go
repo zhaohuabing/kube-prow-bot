@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/xunzhuo/kube-prow-bot/cmd/kube-prow-bot/config"
+	"github.com/xunzhuo/kube-prow-bot/pkg/commands"
 	"github.com/xunzhuo/kube-prow-bot/pkg/core"
 	"k8s.io/klog"
 )
@@ -15,8 +16,8 @@ func main() {
 	}
 
 	if config.Get().TYPE == "created" {
-		core.Greeting()
-		core.Help()
+		commands.Greeting()
+		commands.Help()
 		if err := core.RunCommands(); err != nil {
 			klog.Error(err)
 			// core.Response(fmt.Sprintf("kube prow bot 🤖️ occurred errors:\n\n```\n%s\n```", err.Error()))

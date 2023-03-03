@@ -78,10 +78,35 @@ func removeArea(args ...string) error {
 var addApproveCommandFunc = addApprove
 var addApproveCommandName CommandName = "approve"
 
+func approveNotifier() string {
+	return fmt.Sprintf(`[APPROVALNOTIFIER] This PR is **APPROVED**
+
+This pull-request has been approved by: @%s
+	
+The full list of commands accepted by this bot can be found [here](https://github.com/Xunzhuo/kube-prow-bot/blob/main/COMMAND.md).
+	
+The pull request process is described [here](https://github.com/Xunzhuo/kube-prow-bot/blob/main/PROCESS.md).
+
+<details>
+    <summary>Details</summary>
+
+Needs approval from an approver in each of these files:
++ [OWNERS](https://github.com/%s/blob/main/OWNERS)
+
+Approvers can indicate their approval by writing %s in a comment
+Approvers can cancel approval by writing %s in a comment
+
+</details>
+	`, config.Get().LOGIN, config.Get().GH_REPOSITORY, "`/approve`", "`/approve cancel`")
+}
+
 func addApprove(args ...string) error {
 	if config.Get().ISSUE_KIND != "pr" {
 		return errors.New("you can only approve PRs")
 	}
+
+	comment(approveNotifier())
+
 	if isYouSelf() {
 		return errors.New("you cannot approve your own PRs")
 	}
@@ -104,10 +129,35 @@ func addApprove(args ...string) error {
 var addLGTMCommandFunc = addLGTM
 var addLGTMCommandName CommandName = "lgtm"
 
+func lgtmNotifier() string {
+	return fmt.Sprintf(`[LGTMNOTIFIER] This PR is **LGTM**
+
+This pull-request has been lgtm by: @%s
+	
+The full list of commands accepted by this bot can be found [here](https://github.com/Xunzhuo/kube-prow-bot/blob/main/COMMAND.md).
+	
+The pull request process is described [here](https://github.com/Xunzhuo/kube-prow-bot/blob/main/PROCESS.md).
+
+<details>
+    <summary>Details</summary>
+
+Needs reviewers from an reviewer in each of these files:
++ [OWNERS](https://github.com/%s/blob/main/OWNERS)
+
+Reviewers can indicate their approval by writing %s in a comment
+Reviewers can cancel approval by writing %s in a comment
+
+</details>
+	`, config.Get().LOGIN, config.Get().GH_REPOSITORY, "`/lgtm`", "`/lgtm cancel`")
+}
+
 func addLGTM(args ...string) error {
 	if config.Get().ISSUE_KIND != "pr" {
 		return errors.New("you can only lgtm PRs")
 	}
+
+	comment(lgtmNotifier())
+
 	if isYouSelf() {
 		return errors.New("you cannot lgtm your own PRs")
 	}
