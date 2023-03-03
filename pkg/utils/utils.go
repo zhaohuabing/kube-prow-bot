@@ -19,8 +19,8 @@ func ExecGitHubCommonCmd(args ...string) error {
 		klog.Error(err, "\n")
 		return err
 	}
-
 	klog.Info(string(cmdOutput))
+	// klog.Info("\nEnvs:", cmd.Environ())
 	return nil
 }
 
@@ -34,6 +34,7 @@ func ExecGitHubCmd(args ...string) error {
 	}
 
 	klog.Info(string(cmdOutput))
+	// klog.Info("\nEnvs:", cmd.Environ())
 	return nil
 }
 
@@ -46,5 +47,6 @@ func ExecGitHubCmdWithOutput(args ...string) (string, error) {
 		return "", err
 	}
 
+	// klog.Info("\nEnvs:", cmd.Environ())
 	return string(cmdOutput), nil
 }
